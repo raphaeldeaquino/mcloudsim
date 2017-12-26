@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.Cloudlet;
+import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
@@ -28,7 +29,7 @@ import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
-import br.ufg.inf.mcloudsim.experiment.ExperimentConstants;
+import br.ufg.inf.mcloudsim.simulator.SimulationConstants;
 import br.ufg.inf.mcloudsim.simulator.VmConfiguration;
 
 /**
@@ -76,7 +77,7 @@ public class Helper {
 	public static Datacenter createDatacenter(String name) {
 		// Here are the steps needed to create a Datacenter:
 		// We need to create a list to store our machine
-		List<Host> hostList = createHostList(ExperimentConstants.HOST_NUMBER);
+		List<Host> hostList = createHostList(SimulationConstants.NUM_HOST);
 
 		// Create a DatacenterCharacteristics object that stores the
 		// properties of a data center: architecture, OS, list of
@@ -88,13 +89,13 @@ public class Helper {
 		double time_zone = 10.0; // time zone this resource located
 
 		// the cost of using processing in this resource
-		double cost = ExperimentConstants.BROKER_VM_COST_PER_PROCESSING;
+		double cost = SimulationConstants.BROKER_VM_COST_PER_PROCESSING;
 
 		// the cost of using memory in this resource
-		double costPerMem = ExperimentConstants.BROKER_VM_COST_PER_MEMORY;
+		double costPerMem = SimulationConstants.BROKER_VM_COST_PER_MEMORY;
 
 		// the cost of using storage in this resource
-		double costPerStorage = ExperimentConstants.BROKER_VM_COST_PER_STORAGE;
+		double costPerStorage = SimulationConstants.BROKER_VM_COST_PER_STORAGE;
 
 		// the cost of using bw in this resource
 		double costPerBw = 0.0;
@@ -129,10 +130,18 @@ public class Helper {
 	 */
 	public static List<Vm> createVmList(VmConfiguration configuration, int vmsNumber, int userId) {
 		List<Vm> vms = new LinkedList<Vm>();
+		CloudletScheduler cloudletScheduler = null;
+		try {
+			Class<? extends CloudletScheduler> classType = configuration.getCloudletSchedulerClass();
+			cloudletScheduler = classType.getConstructor().newInstance();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
 		for (int i = 0; i < vmsNumber; i++) {
-			vms.add(new Vm(i, userId, configuration.getMips(), configuration.getNumberOfPes(), configuration.getRam(),
-					configuration.getBw(), configuration.getSize(), configuration.getVmm(),
-					configuration.getCloudletScheduler()));
+			vms.add(new Vm(i, userId, configuration.getMips(), configuration.getNumberOfPes(),
+					(int) configuration.getRam(), (int) configuration.getBw(), (int) configuration.getSize(),
+					configuration.getVmm(), cloudletScheduler));
 		}
 		return vms;
 	}
@@ -159,14 +168,14 @@ public class Helper {
 		List<Host> hostList = new LinkedList<Host>();
 		for (int i = 0; i < hostsNumber; i++) {
 			List<Pe> peList = new ArrayList<Pe>();
-			for (int j = 0; j < ExperimentConstants.HOST_NUMBER_OF_PES; j++) {
-				peList.add(new Pe(j, new PeProvisionerSimple(ExperimentConstants.HOST_MIPS)));
+			for (int j = 0; j < SimulationConstants.HOST_NUMBER_OF_PES; j++) {
+				peList.add(new Pe(j, new PeProvisionerSimple(SimulationConstants.HOST_MIPS)));
 			}
 
 			try {
-				hostList.add(new Host(i, new RamProvisionerSimple(ExperimentConstants.HOST_RAM),
-						new BwProvisionerSimple(ExperimentConstants.HOST_BW), ExperimentConstants.HOST_STORAGE, peList,
-						ExperimentConstants.BROKER_VM_SCHEDULER.getConstructor(List.class).newInstance(peList)));
+				hostList.add(new Host(i, new RamProvisionerSimple(SimulationConstants.HOST_RAM),
+						new BwProvisionerSimple(SimulationConstants.HOST_BW), SimulationConstants.HOST_STORAGE, peList,
+						SimulationConstants.BROKER_VM_SCHEDULER.getConstructor(List.class).newInstance(peList)));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -194,7 +203,7 @@ public class Helper {
 			cloudlet = list.get(i);
 			Log.print(cloudlet.getCloudletId() + "\t");
 
-			if (cloudlet.getCloudletStatus() == Cloudlet.SUCCESS) {
+			if (cloudlet.getCloudletStatusString().equals(Cloudlet.getStatusString(Cloudlet.SUCCESS))) {
 				Log.print("SUCCESS");
 
 				Log.printLine("\t" + cloudlet.getCloudletLength() + "\t" + cloudlet.getResourceId() + "\t#"

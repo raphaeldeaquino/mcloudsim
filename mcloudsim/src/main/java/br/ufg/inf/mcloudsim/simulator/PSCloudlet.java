@@ -24,19 +24,39 @@ import org.cloudbus.cloudsim.UtilizationModel;
 public class PSCloudlet extends Cloudlet implements Comparable<PSCloudlet> {
 
 	public enum cloudletType {
-		PUBLISH, SUBSCRIBE
+		IN, OUT
 	}
 
 	private cloudletType type;
 	private double arrivalTime;
+	private String pathId;
+	private String brokerId;
 
-	public PSCloudlet(int cloudletId, long cloudletLength, int pesNumber, long cloudletFileSize,
+	public PSCloudlet(int cloudletId, String pathId, String brokerId, long cloudletLength, int pesNumber, long cloudletFileSize,
 			long cloudletOutputSize, UtilizationModel utilizationModelCpu, UtilizationModel utilizationModelRam,
 			UtilizationModel utilizationModelBw, cloudletType type, double arrivalTime) {
 		super(cloudletId, cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, utilizationModelCpu,
 				utilizationModelRam, utilizationModelBw);
+		this.pathId = pathId;
+		this.brokerId = brokerId;
 		this.type = type;
 		this.arrivalTime = arrivalTime;
+	}
+
+	public String getPathId() {
+		return pathId;
+	}
+
+	public void setPathId(String pathId) {
+		this.pathId = pathId;
+	}
+	
+	public String getBrokerId() {
+		return brokerId;
+	}
+	
+	public void setBrokerId(String brokerId) {
+		this.brokerId = brokerId;
 	}
 
 	public double getArrivalTime() {
@@ -46,9 +66,23 @@ public class PSCloudlet extends Cloudlet implements Comparable<PSCloudlet> {
 	public cloudletType getType() {
 		return type;
 	}
-
+	
+	public boolean isInput() {
+		return this.type == cloudletType.IN;
+	}
+	
+	public boolean isOutput() {
+		return this.type == cloudletType.OUT;
+	}
+	
 	public int compareTo(PSCloudlet o) {
 		return this.getCloudletId() - o.getCloudletId();
+	}
+
+	@Override
+	public String toString() {
+		return type.toString().substring(0, 1) + "" + getCloudletId() + " [" + getExecStartTime() + ":"
+				+ getFinishTime() + ":" + getActualCPUTime() + "]";
 	}
 
 }

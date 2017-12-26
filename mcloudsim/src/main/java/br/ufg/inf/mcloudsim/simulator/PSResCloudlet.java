@@ -9,13 +9,7 @@
 
 package br.ufg.inf.mcloudsim.simulator;
 
-import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.ResCloudlet;
-import org.cloudbus.cloudsim.core.CloudSim;
-
-import br.ufg.inf.mcloudsim.core.ConnectivityStatus;
-import br.ufg.inf.mcloudsim.core.EventEntity;
-import br.ufg.inf.mcloudsim.core.Subscriber;
 
 /**
  * It's a extension of {@link ResCloudlet} to process only when subscriber is
@@ -31,27 +25,11 @@ public class PSResCloudlet extends ResCloudlet {
 	 *            The cloudlet being managed
 	 */
 	public PSResCloudlet(PSCloudlet cloudlet) {
-		super(cloudlet);
+		this(cloudlet, 0, 0, -1);
 	}
 
 	public PSResCloudlet(PSCloudlet cloudlet, long startTime, int duration, int reservID) {
 		super(cloudlet, startTime, duration, reservID);
-	}
-
-	/**
-	 * Updates processing only if subscriber is online
-	 */
-	@Override
-	public void updateCloudletFinishedSoFar(long miLength) {
-		EventEntity entity = PSDatacenterBroker.cloudletMap.get(this.getCloudlet());
-
-		if (entity instanceof Subscriber && ((Subscriber) entity).getStatus() == ConnectivityStatus.OFFLINE) {
-			Log.printLine(CloudSim.clock() + ": Cloudlet " + getCloudletId()
-					+ " didn't processed due subscriber disconnection");
-		} else {
-			super.updateCloudletFinishedSoFar(miLength);
-		}
-
 	}
 
 	/*
@@ -61,7 +39,7 @@ public class PSResCloudlet extends ResCloudlet {
 	 */
 	@Override
 	public String toString() {
-		return getCloudletId() + ":" + getCloudletArrivalTime();
+		return getCloudletId() + "[" + getCloudlet().getExecStartTime() + ":" + getCloudlet().getFinishTime() + "]";
 	}
 
 }

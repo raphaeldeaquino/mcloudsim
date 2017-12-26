@@ -21,23 +21,39 @@ public class VmConfiguration {
 
 	private double mips;
 	private int numberOfPes;
-	private int ram;
-	private long bw;
-	private long size;
+	private double ram;
+	private double bw;
+	private double size;
 	private String vmm;
-	private CloudletScheduler cloudletScheduler;
+	private Class<? extends CloudletScheduler> cloudletSchedulerClass;
 	private int reqPerSec;
+	private String name;
+	private String provider;
+	private String region;
 	private double price;
 
-	public VmConfiguration(double mips, int numberOfPes, int ram, long bw, long size, String vmm,
-			CloudletScheduler cloudletScheduler) {
+	public VmConfiguration(double mips, int numberOfPes, double ram, long bw, double size, String vmm,
+			Class<? extends CloudletScheduler> cloudletSchedulerClass) {
 		this.setMips(mips);
 		this.setNumberOfPes(numberOfPes);
 		this.setRam(ram);
 		this.setBw(bw);
 		this.setSize(size);
 		this.setVmm(vmm);
-		this.setCloudletScheduler(cloudletScheduler);
+		this.setCloudletSchedulerClass(cloudletSchedulerClass);
+	}
+
+	public VmConfiguration(double mips, int numberOfPes, double ram, double bw, double size, String name, String provider,
+			String region, double price) {
+		this.setMips(mips);
+		this.setNumberOfPes(numberOfPes);
+		this.setRam(ram);
+		this.setBw(bw);
+		this.setSize(size);
+		this.setName(name);
+		this.setProvider(provider);
+		this.setRegion(region);
+		this.setPrice(price);
 	}
 
 	public double getMips() {
@@ -56,27 +72,27 @@ public class VmConfiguration {
 		this.numberOfPes = numberOfPes;
 	}
 
-	public int getRam() {
+	public double getRam() {
 		return ram;
 	}
 
-	public void setRam(int ram) {
+	public void setRam(double ram) {
 		this.ram = ram;
 	}
 
-	public long getBw() {
+	public double getBw() {
 		return bw;
 	}
 
-	public void setBw(long bw) {
+	public void setBw(double bw) {
 		this.bw = bw;
 	}
 
-	public long getSize() {
+	public double getSize() {
 		return size;
 	}
 
-	public void setSize(long size) {
+	public void setSize(double size) {
 		this.size = size;
 	}
 
@@ -88,12 +104,12 @@ public class VmConfiguration {
 		this.vmm = vmm;
 	}
 
-	public CloudletScheduler getCloudletScheduler() {
-		return cloudletScheduler;
+	public Class<? extends CloudletScheduler> getCloudletSchedulerClass() {
+		return cloudletSchedulerClass;
 	}
 
-	public void setCloudletScheduler(CloudletScheduler cloudletScheduler) {
-		this.cloudletScheduler = cloudletScheduler;
+	public void setCloudletSchedulerClass(Class<? extends CloudletScheduler> cloudletSchedulerClass) {
+		this.cloudletSchedulerClass = cloudletSchedulerClass;
 	}
 
 	public int getReqPerSec() {
@@ -110,6 +126,32 @@ public class VmConfiguration {
 
 	public void setPrice(double price) {
 		this.price = price;
+	}
+	
+	
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getProvider() {
+		return provider;
+	}
+
+	public void setProvider(String provider) {
+		this.provider = provider;
+	}
+
+	public String getRegion() {
+		return region;
+	}
+
+	public void setRegion(String region) {
+		this.region = region;
 	}
 
 	public String toString() {

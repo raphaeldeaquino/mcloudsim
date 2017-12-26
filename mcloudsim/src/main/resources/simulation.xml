@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- When not explicit, values are in Giga -->
+<experiment>
+	<nodes>
+		<publisher id="P4">
+			<topic>TOPIC.1</topic>
+			<rate>0.5</rate>
+			<!-- From D to Mi = ((clock * 10^9 * 4) / 10^6) * D -->
+			<MIpr>825</MIpr>
+			<MItr>1650</MItr>
+		</publisher>
+		<broker id="B3" />
+		<broker id="B10" />
+		<broker id="B19" />
+		<subscriber id="S1">
+			<topic>TOPIC.1</topic>
+			<tON>10</tON>
+			<tOFF>10</tOFF>
+		</subscriber>
+	</nodes>
+	<paths>
+		<path>
+			<pathSequence>P4 B3 B10 B19 S1</pathSequence>
+			<nodesAtt>
+				<node id="P4" rt="0.0" />
+				<node id="B3" lOth="1" />
+				<node id="B10" lOth="1" />
+				<node id="B19" lOth="1" />
+				<node id="S1" rt="0.0" />
+			</nodesAtt>
+		</path>
+	</paths>
+	<resource>
+		<vmCollection provider="Amazon" region="us-west-2">
+			<vmType>
+				<id>t2.nano</id>
+				<cpu>
+					<cores>4</cores>
+					<clock>3.3</clock>
+				</cpu>
+				<ram>0.5</ram>
+				<storage>10</storage>
+				<bandwidth>0.1</bandwidth>
+				<price>0.0058</price>
+			</vmType>
+		</vmCollection>
+	</resource>
+	<resourceSynthesis>
+		<synthesisResult provider="Amazon" region="us-west-2">
+			<mapping id="B3" value="t2.nano" />
+			<mapping id="B10" value="t2.nano" />
+			<mapping id="B19" value="t2.nano" />
+		</synthesisResult>
+	</resourceSynthesis>
+</experiment>

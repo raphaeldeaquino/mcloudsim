@@ -16,10 +16,13 @@ package br.ufg.inf.mcloudsim.core;
  * @author Raphael Gomes
  *
  */
-public class Subscriber extends EventEntity {
+public class Subscriber extends EdgeEventEntity {
 
 	/** Connectivity status of subscriber **/
 	private ConnectivityStatus status;
+
+	private double tON;
+	private double tOFF;
 
 	/**
 	 * Creates a subscriber with automatic identifier and the given topic. The
@@ -61,18 +64,60 @@ public class Subscriber extends EventEntity {
 	 *            The subscriber connectivity status
 	 */
 	public Subscriber(int id, String topic, ConnectivityStatus status) {
-		super();
-		this.id = id;
-		this.topic = topic;
+		super("S" + id, topic);
 		this.status = status;
+	}
+
+	public Subscriber(String id, String topic, double tON, double tOFF) {
+		super(id, topic);
+		this.tON = tON;
+		this.tOFF = tOFF;
+		this.status = ConnectivityStatus.ONLINE;
 	}
 
 	public ConnectivityStatus getStatus() {
 		return status;
 	}
+	
+	public boolean isOnline() {
+		return this.status == ConnectivityStatus.ONLINE;
+	}
+	
+	public boolean isOffline() {
+		return this.status == ConnectivityStatus.OFFLINE;
+	}
 
 	public void setStatus(ConnectivityStatus status) {
 		this.status = status;
+	}
+
+	public double gettON() {
+		return tON;
+	}
+
+	public void settON(double tON) {
+		this.tON = tON;
+	}
+
+	public double gettOFF() {
+		return tOFF;
+	}
+
+	public void settOFF(double tOFF) {
+		this.tOFF = tOFF;
+	}
+
+	@Override
+	public String toString() {
+		return "Subscriber " + id + " (" + getStatus() + ")";
+	}
+
+	@Override
+	public void setId(String id) {
+		if (id == null || id.isEmpty() || !id.startsWith("S"))
+			throw new IllegalArgumentException("Invalid subscriber ID: " + id);
+
+		this.id = id;
 	}
 
 }
