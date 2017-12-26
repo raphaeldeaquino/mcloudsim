@@ -16,10 +16,12 @@ package br.ufg.inf.mcloudsim.core;
  * @author Raphael Gomes
  *
  */
-public class Publisher extends EventEntity {
+public class Publisher extends EdgeEventEntity {
 
 	/** Rate of events generation **/
 	private double rate;
+	private double MIpr;
+	private double MItr;
 
 	/**
 	 * Creates a publisher with automatic identifier and given topic and rate.
@@ -44,10 +46,15 @@ public class Publisher extends EventEntity {
 	 *            Rate of events generation
 	 */
 	public Publisher(int id, String topic, double rate) {
-		super();
-		this.id = id;
-		this.topic = topic;
+		super("P" + id, topic);
 		this.rate = rate;
+	}
+
+	public Publisher(String id, String topic, double rate, double mIpr, double mItr) {
+		super(id, topic);
+		this.rate = rate;
+		MIpr = mIpr;
+		MItr = mItr;
 	}
 
 	public double getRate() {
@@ -56,6 +63,35 @@ public class Publisher extends EventEntity {
 
 	public void setRate(double rate) {
 		this.rate = rate;
+	}
+
+	public double getMIpr() {
+		return MIpr;
+	}
+
+	public void setMIpr(double mIpr) {
+		MIpr = mIpr;
+	}
+
+	public double getMItr() {
+		return MItr;
+	}
+
+	public void setMItr(double mItr) {
+		MItr = mItr;
+	}
+
+	@Override
+	public void setId(String id) {
+		if (id == null || id.isEmpty() || !id.startsWith("P"))
+			throw new IllegalArgumentException("Invalid publisher ID: " + id);
+
+		this.id = id;
+	}
+
+	@Override
+	public String toString() {
+		return "Publisher " + this.id;
 	}
 
 }

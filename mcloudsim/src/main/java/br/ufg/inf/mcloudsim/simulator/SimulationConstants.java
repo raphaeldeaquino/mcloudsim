@@ -7,12 +7,8 @@
  * Copyright (c) 2014-2016, Universidade Federal de Goiás, Brazil
  */
 
-package br.ufg.inf.mcloudsim.experiment;
+package br.ufg.inf.mcloudsim.simulator;
 
-import org.cloudbus.cloudsim.CloudletScheduler;
-import org.cloudbus.cloudsim.CloudletSchedulerSpaceShared;
-import org.cloudbus.cloudsim.UtilizationModel;
-import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.VmScheduler;
 import org.cloudbus.cloudsim.VmSchedulerSpaceShared;
 
@@ -22,12 +18,26 @@ import org.cloudbus.cloudsim.VmSchedulerSpaceShared;
  * @author Raphael Gomes
  *
  */
-public interface ExperimentConstants {
+public interface SimulationConstants {
+	
+	/** How many times the simulation is performed */
+	public static final int EXPERIMENT_RUNS = 1;
+	
+	/** How long each simulation runs **/
+	public static final int SIMULATION_INTERVAL = (int) (1 * 60.0 * 60.0);
+	
+	/** Publish rate (events/time unit) */
+	//public static final double[] PUBLISH_RATE = {0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 3.7, 3.9};
+	//public static final double[] PUBLISH_RATE = {0.5, 1.0, 5.0, 10.0, 15.0, 20.0, 21.0, 22.0, 23.0};
+	public static final double[] PUBLISH_RATE = {1.0};
+	
+	/** File with pub/sub network description */
+	public static final String PS_NETWORK_DESCRIPTOR = "simulation.xml";
+	
+	public static final double MINIMUM_TIME_BETWEEN_EVENTS = 0.01;
+	
 	/** How many hosts will have the private cloud */
-	public final static int HOST_NUMBER = 100;
-
-	/** How many users executes the simulation */
-	public final static int NUM_USER = 1;
+	public final static int NUM_HOST = 100;
 
 	/**
 	 * Host configuration. We used here the configuration of Intel® Xeon®
@@ -46,18 +56,10 @@ public interface ExperimentConstants {
 	public final static int CLOUDLET_PES = 1;
 	public final static long CLOUDLET_FILESIZE = 0;
 	public final static long CLOUDLET_OUTPUT_SIZE = 0;
-	public final static Class<? extends UtilizationModel> CLOUDLET_UTILIZATION_MODEL = UtilizationModelFull.class;
-	public final static Class<? extends CloudletScheduler> CLOUDLET_SCHEDULER = CloudletSchedulerSpaceShared.class;
-
-	/** How many times the simulatin is performed */
-	public static final int EXPERIMENT_RUNS = 10;
-
-	/** How long each simulation runs **/
-	public static final int SIMULATION_INTERVAL = (int) (10 * 60 * 60);
 
 	/** VM configuration to run pub/sub broker */
 	public static final int BROKER_VM_MIPS = 800;
-	public static final int BROKER_VM_NUMBER_OF_PES = 1;
+	public static final int BROKER_VM_NUMBER_OF_PES = 4;
 	public static final int BROKER_VM_RAM = 768;
 	public static final int BROKER_VM_BW = 1000;
 	public static final int BROKER_VM_SIZE = 10000;
@@ -70,36 +72,7 @@ public interface ExperimentConstants {
 	/** How long is file transfer in network */
 	public static final double LATENCY_OVERHEAD = 0;
 
-	/** Publish rate (events/time unit) */
-	public static final double[] PUBLISH_RATE = { 1.5 };// , 0.1, 0.5, 1, 1.5,
-														// 2, 2.5, 3, 3.5, 3.7,
-														// 3.9, 3.95, 4};
-	
-	/** Single topic used in experiments */
-	public static final String TOPIC = "TOPIC.1.0";
-
-	/** How many subscribers to each topic */
-	public static final int SUBSCRIBE_NUMBER = 1;	
-
 	/** I/O size */
 	public static final long PUBLISH_CLOUDLET_FILESIZE = 0;
 	public static final long SUBSCRIBE_CLOUDLET_FILESIZE = PUBLISH_CLOUDLET_FILESIZE;
-
-	/**
-	 * Connectivity distribution rate. The time of connection/disconnection is
-	 * given by 1/SUBSCRIBE_ON_OFF_RATE
-	 */
-	public static final double SUBSCRIBE_ON_OFF_RATE = 0.05;
-
-	/**
-	 * How much (in % of module) the measured connectivity distribution must be
-	 * from expected
-	 */
-	public static final double SUBSCRIBE_ON_OFF_DIFF = 0.8;
-
-	/** How long time units the publish event takes to be processed */
-	public static final double SERVICE_TIME_IN = 0.005;
-
-	/** How long time units the subscribe event takes to be processed */
-	public static final double SERVICE_TIME_OUT = 0.125;
 }
