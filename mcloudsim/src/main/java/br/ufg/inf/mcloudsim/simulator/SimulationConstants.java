@@ -24,6 +24,7 @@ public interface SimulationConstants {
 	public static final int EXPERIMENT_RUNS = 1;
 	
 	/** How long each simulation runs **/
+<<<<<<< HEAD
 	public static final int SIMULATION_INTERVAL = 10;//(int) (1 * 60.0 * 60.0);
 	
 	/** Publish rate (events/time unit) */
@@ -35,6 +36,19 @@ public interface SimulationConstants {
 	public static final String PS_NETWORK_DESCRIPTOR = "simulation.xml";
 	
 	public static final double MINIMUM_TIME_BETWEEN_EVENTS = 0.001;
+=======
+	public static final int SIMULATION_INTERVAL = (int) (1 * 60.0 * 60.0);
+	
+	/** Publish rate (events/time unit) */
+	//public static final double[] PUBLISH_RATE = {0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 3.7, 3.9};
+	//public static final double[] PUBLISH_RATE = {0.5, 1.0, 5.0, 10.0, 15.0, 20.0, 21.0, 22.0, 23.0};
+	public static final double[] PUBLISH_RATE = {1.0};
+	
+	/** File with pub/sub network description */
+	public static final String PS_NETWORK_DESCRIPTOR = "simulation.xml";
+	
+	public static final double MINIMUM_TIME_BETWEEN_EVENTS = 0.01;
+>>>>>>> refs/remotes/origin/master
 	
 	/** How many hosts will have the private cloud */
 	public final static int NUM_HOST = 100;

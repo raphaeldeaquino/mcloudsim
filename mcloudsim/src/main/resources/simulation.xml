@@ -35,7 +35,11 @@
 			<vmType>
 				<id>t2.nano</id>
 				<cpu>
+<<<<<<< HEAD
 					<cores>4</cores>
+=======
+					<cores>1</cores>
+>>>>>>> refs/remotes/origin/master
 					<clock>3.3</clock>
 				</cpu>
 				<ram>0.5</ram>

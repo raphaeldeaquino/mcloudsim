@@ -87,7 +87,10 @@ public class PSCloudletSchedulerSpaceShared extends CloudletSchedulerSpaceShared
 		double capacity = 0.0;
 		int cpus = 0;
 		Map<ResCloudlet, Long> remainingCloudletLengthMap = new HashMap<>();
+<<<<<<< HEAD
 		Subscriber subscriber = psNetworkPath.getSubscriber();
+=======
+>>>>>>> refs/remotes/origin/master
 
 		for (Double mips : mipsShare) { // count the CPUs available to the VMM
 			capacity += mips;
@@ -103,6 +106,7 @@ public class PSCloudletSchedulerSpaceShared extends CloudletSchedulerSpaceShared
 			remainingCloudletLengthMap.put(rcl, rcl.getRemainingCloudletLength());
 			long cloudletFinishedSoFar = (long) (capacity * timeSpam * rcl.getNumberOfPes() * Consts.MILLION);
 			if (isOnOffBroker() && ((PSCloudlet) rcl.getCloudlet()).isOutput()) {
+<<<<<<< HEAD
 				if (subscriber.isOnline()) {
 					rcl.updateCloudletFinishedSoFar(cloudletFinishedSoFar);
 					remainingCloudletLengthMap.put(rcl, rcl.getRemainingCloudletLength() - cloudletFinishedSoFar);
@@ -126,6 +130,29 @@ public class PSCloudletSchedulerSpaceShared extends CloudletSchedulerSpaceShared
 						this.pausedCloudlets.add((PSCloudlet) rcl.getCloudlet());
 						usedPes -= rcl.getNumberOfPes();
 					}
+=======
+				Subscriber subscriber = psNetworkPath.getSubscriber();
+				if (subscriber.isOnline()) {
+					rcl.updateCloudletFinishedSoFar(cloudletFinishedSoFar);
+					remainingCloudletLengthMap.put(rcl, rcl.getRemainingCloudletLength() - cloudletFinishedSoFar);
+				} else
+					Log.printLine(CloudSim.clock() + ": Cloudlet " + rcl.getCloudletId()
+							+ " paused due subscriber disconnection");
+			} else {
+				rcl.updateCloudletFinishedSoFar(cloudletFinishedSoFar);
+				remainingCloudletLengthMap.put(rcl, rcl.getRemainingCloudletLength() - cloudletFinishedSoFar);
+			}
+		}
+
+		// check the cloudlets of offline subscribers
+		for (ResCloudlet rcl : remainingCloudletLengthMap.keySet()) {
+			// If the cloudlet was not processed due subscriber disconnection
+			if (rcl.getRemainingCloudletLength() == remainingCloudletLengthMap.get(rcl)) {
+				boolean paused = cloudletPause(rcl.getCloudletId());
+				if (paused) {
+					this.pausedCloudlets.add((PSCloudlet) rcl.getCloudlet());
+					usedPes -= rcl.getNumberOfPes();
+>>>>>>> refs/remotes/origin/master
 				}
 			}
 		}
@@ -200,7 +227,11 @@ public class PSCloudletSchedulerSpaceShared extends CloudletSchedulerSpaceShared
 					+ psCloudlet.getCloudletId() + " to broker " + nodeId);
 
 		// Check if this task is for an offline subscriber
+<<<<<<< HEAD
 		if (isOnOffBroker() && psCloudlet.isOutput()) {
+=======
+		if (psCloudlet.isOutput() && isOnOffBroker()) {
+>>>>>>> refs/remotes/origin/master
 			Subscriber subscriber = this.psNetworkPath.getSubscriber();
 			if (subscriber.isOffline()) {
 				newCloudlets.add(psCloudlet);
@@ -247,7 +278,15 @@ public class PSCloudletSchedulerSpaceShared extends CloudletSchedulerSpaceShared
 		cloudlet.setCloudletLength(length);
 		return cloudlet.getCloudletLength() / capacity;
 	}
+	
+	@Override
+	public double cloudletResume(int cloudletId) {
+		Log.printLine(CloudSim.clock() + ": " + getClass().getSimpleName() + ": Resuming output cloudlet "
+				+ cloudletId + " on broker " + nodeId);
+		return super.cloudletResume(cloudletId);
+	}
 
+<<<<<<< HEAD
 	@Override
 	public double cloudletResume(int cloudletId) {
 		Log.printLine(CloudSim.clock() + ": " + getClass().getSimpleName() + ": Resuming output cloudlet " + cloudletId
@@ -255,6 +294,8 @@ public class PSCloudletSchedulerSpaceShared extends CloudletSchedulerSpaceShared
 		return super.cloudletResume(cloudletId);
 	}
 
+=======
+>>>>>>> refs/remotes/origin/master
 	/**
 	 * Check if this cloudlet scheduler manages an On OFF broker
 	 * 
