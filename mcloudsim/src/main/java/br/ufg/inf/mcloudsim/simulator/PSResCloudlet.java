@@ -9,6 +9,7 @@
 
 package br.ufg.inf.mcloudsim.simulator;
 
+import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.ResCloudlet;
 
 /**
@@ -18,7 +19,10 @@ import org.cloudbus.cloudsim.ResCloudlet;
  * @author Raphael Gomes
  *
  */
+// OK
 public class PSResCloudlet extends ResCloudlet {
+
+	private long cloudletTransmittedSoFar;
 
 	/**
 	 * @param cloudlet
@@ -30,6 +34,48 @@ public class PSResCloudlet extends ResCloudlet {
 
 	public PSResCloudlet(PSCloudlet cloudlet, long startTime, int duration, int reservID) {
 		super(cloudlet, startTime, duration, reservID);
+		this.init();
+	}
+
+	// OK
+	private void init() {
+		// In case a Cloudlet has been executed partially by some other grid
+		// hostList.
+		cloudletTransmittedSoFar = ((PSCloudlet) getCloudlet()).getCloudletTransmittedSoFar();
+	}
+
+	// OK
+	public long getRemainingCloudletBytes() {
+		long length = (long) (((PSCloudlet) getCloudlet()).getBytes() - cloudletTransmittedSoFar);
+
+		// Remaining Cloudlet length can't be negative number.
+		if (length < 0) {
+			return 0;
+		}
+
+		return length;
+	}
+
+	// OK
+	public void finalizeCloudletTransmission() {
+		long finished = 0;
+		// if (cloudlet.getCloudletTotalLength() * Consts.MILLION <
+		// cloudletFinishedSoFar) {
+		if (getCloudlet().getCloudletStatus() == Cloudlet.SUCCESS) {
+			finished = ((PSCloudlet)getCloudlet()).getBytes();
+		} else {
+			finished = cloudletTransmittedSoFar;
+		}
+
+		((PSCloudlet)getCloudlet()).setCloudletTransmittedSoFar(finished);
+	}
+
+	public void updateCloudletTransmittedSoFar(long bytes) {
+		cloudletTransmittedSoFar += bytes;
+		
+		if (((PSCloudlet)getCloudlet()).getBytes() - cloudletTransmittedSoFar == 1) {
+			cloudletTransmittedSoFar++;
+		}
 	}
 
 	/*

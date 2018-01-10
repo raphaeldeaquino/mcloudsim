@@ -3,6 +3,7 @@ package br.ufg.inf.mcloudsim.simulator;
 import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.Vm;
 
+// OK
 public class VmType extends Vm {
 
 	public static final String DEFAULT_VMM = "Xen";
@@ -15,6 +16,21 @@ public class VmType extends Vm {
 	private String region;
 	private double price;
 
+	/**
+	 * 
+	 * @param name
+	 * @param id
+	 * @param userId
+	 * @param mips
+	 * @param numberOfPes
+	 * @param ram
+	 * @param bw Bandwidth in Mbps
+	 * @param size
+	 * @param cloudletScheduler
+	 * @param provider
+	 * @param region
+	 * @param price
+	 */
 	public VmType(String name, int id, int userId, double mips, int numberOfPes, double ram, double bw, double size,
 			CloudletScheduler cloudletScheduler, String provider, String region, double price) {
 		super(id, userId, mips, numberOfPes, (int) ram, (long) bw, (long) size, DEFAULT_VMM, cloudletScheduler);
@@ -26,20 +42,14 @@ public class VmType extends Vm {
 		this.region = region;
 		this.price = price;
 	}
-	
-	
 
 	public String getName() {
 		return name;
 	}
 
-
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
-
 
 	public double getTotalRam() {
 		return ram;
@@ -100,6 +110,14 @@ public class VmType extends Vm {
 		this.price = price;
 	}
 	
+	// OK
+	public double updateVmTransmission(double currentTime, Double bwShare) {
+		if (bwShare != null) {
+			return ((PSCloudletSchedulerSpaceShared)getCloudletScheduler()).updateVmTransmission(currentTime, bwShare);
+		}
+		return 0.0;
+	}
+
 	@Override
 	public String toString() {
 		return name + " #" + getId();

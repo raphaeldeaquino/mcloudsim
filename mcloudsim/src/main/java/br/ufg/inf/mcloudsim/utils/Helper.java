@@ -29,6 +29,8 @@ import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
+import br.ufg.inf.mcloudsim.simulator.PSDatacenter;
+import br.ufg.inf.mcloudsim.simulator.PSHost;
 import br.ufg.inf.mcloudsim.simulator.SimulationConstants;
 import br.ufg.inf.mcloudsim.simulator.VmConfiguration;
 
@@ -109,7 +111,7 @@ public class Helper {
 		// We need to create a Datacenter object.
 		Datacenter datacenter = null;
 		try {
-			datacenter = new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
+			datacenter = new PSDatacenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -173,7 +175,7 @@ public class Helper {
 			}
 
 			try {
-				hostList.add(new Host(i, new RamProvisionerSimple(SimulationConstants.HOST_RAM),
+				hostList.add(new PSHost(i, new RamProvisionerSimple(SimulationConstants.HOST_RAM),
 						new BwProvisionerSimple(SimulationConstants.HOST_BW), SimulationConstants.HOST_STORAGE, peList,
 						SimulationConstants.BROKER_VM_SCHEDULER.getConstructor(List.class).newInstance(peList)));
 			} catch (Exception e) {

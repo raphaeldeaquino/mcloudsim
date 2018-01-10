@@ -53,7 +53,7 @@ public class PSNetworkCreator {
 			}
 
 			try {
-				hostList.add(new Host(i, new RamProvisionerSimple(SimulationConstants.HOST_RAM),
+				hostList.add(new PSHost(i, new RamProvisionerSimple(SimulationConstants.HOST_RAM),
 						new BwProvisionerSimple(SimulationConstants.HOST_BW), SimulationConstants.HOST_STORAGE, peList,
 						SimulationConstants.BROKER_VM_SCHEDULER.getConstructor(List.class).newInstance(peList)));
 			} catch (Exception e) {
@@ -107,7 +107,7 @@ public class PSNetworkCreator {
 		// We need to create a Datacenter object.
 		Datacenter datacenter = null;
 		try {
-			datacenter = new Datacenter(provider, characteristics, new VmAllocationPolicySimple(hostList), storageList,
+			datacenter = new PSDatacenter(provider, characteristics, new VmAllocationPolicySimple(hostList), storageList,
 					DATACENTER_SCHED_INTERVAL);
 		} catch (Exception e) {
 			throw new SimulationCreationException(e.getMessage(), e);

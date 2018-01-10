@@ -21,7 +21,7 @@ public class Publisher extends EdgeEventEntity {
 	/** Rate of events generation **/
 	private double rate;
 	private double MIpr;
-	private double MItr;
+	private double Btr;
 
 	/**
 	 * Creates a publisher with automatic identifier and given topic and rate.
@@ -50,11 +50,11 @@ public class Publisher extends EdgeEventEntity {
 		this.rate = rate;
 	}
 
-	public Publisher(String id, String topic, double rate, double mIpr, double mItr) {
+	public Publisher(String id, String topic, double rate, double mIpr, double Btr) {
 		super(id, topic);
 		this.rate = rate;
-		MIpr = mIpr;
-		MItr = mItr;
+		this.MIpr = mIpr;
+		this.Btr = Btr;
 	}
 
 	public double getRate() {
@@ -73,12 +73,12 @@ public class Publisher extends EdgeEventEntity {
 		MIpr = mIpr;
 	}
 
-	public double getMItr() {
-		return MItr;
+	public double getBtr() {
+		return Btr;
 	}
 
-	public void setMItr(double mItr) {
-		MItr = mItr;
+	public void setBtr(double Btr) {
+		this.Btr = Btr;
 	}
 
 	@Override

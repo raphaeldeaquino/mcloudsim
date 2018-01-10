@@ -188,9 +188,9 @@ public class PSSimulation {
 
 	private PSCloudlet createCloudlet(Publisher publisher, int userId, double arrivalTime, Vm vm, String brokerId) {
 		PSCloudlet cloudlet = new PSCloudlet(++cloudletCount, publisher.getId(), brokerId, (long) publisher.getMIpr(),
-				1, SimulationConstants.PUBLISH_CLOUDLET_FILESIZE, SimulationConstants.CLOUDLET_OUTPUT_SIZE,
-				new UtilizationModelFull(), new UtilizationModelFull(), new UtilizationModelFull(),
-				PSCloudlet.cloudletType.IN, arrivalTime);
+				(long) publisher.getBtr(), 1, SimulationConstants.PUBLISH_CLOUDLET_FILESIZE,
+				SimulationConstants.CLOUDLET_OUTPUT_SIZE, new UtilizationModelFull(), new UtilizationModelFull(),
+				new UtilizationModelFull(), PSCloudlet.cloudletType.IN, arrivalTime);
 		cloudlet.setUserId(userId);
 		cloudlet.setVmId(vm.getId());
 

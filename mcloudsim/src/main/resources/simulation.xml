@@ -7,15 +7,16 @@
 			<rate>0.5</rate>
 			<!-- From D to Mi = ((clock * 10^9 * 4) / 10^6) * D -->
 			<MIpr>825</MIpr>
-			<MItr>1650</MItr>
+			<!-- From D to B = (bandwidth * 125000) * D -->
+			<Btr>15625</Btr>
 		</publisher>
 		<broker id="B3" />
 		<broker id="B10" />
 		<broker id="B19" />
 		<subscriber id="S1">
 			<topic>TOPIC.1</topic>
-			<tON>10</tON>
-			<tOFF>10</tOFF>
+			<tON>40</tON>
+			<tOFF>40</tOFF>
 		</subscriber>
 	</nodes>
 	<paths>
@@ -35,16 +36,12 @@
 			<vmType>
 				<id>t2.nano</id>
 				<cpu>
-<<<<<<< HEAD
-					<cores>4</cores>
-=======
-					<cores>1</cores>
->>>>>>> refs/remotes/origin/master
+					<cores>2</cores>
 					<clock>3.3</clock>
 				</cpu>
 				<ram>0.5</ram>
 				<storage>10</storage>
-				<bandwidth>0.1</bandwidth>
+				<bandwidth>1</bandwidth>
 				<price>0.0058</price>
 			</vmType>
 		</vmCollection>

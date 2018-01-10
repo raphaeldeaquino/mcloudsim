@@ -10,7 +10,6 @@
 package br.ufg.inf.mcloudsim.simulator;
 
 import org.cloudbus.cloudsim.VmScheduler;
-import org.cloudbus.cloudsim.VmSchedulerSpaceShared;
 
 /**
  * Constants used in the experiment
@@ -24,31 +23,17 @@ public interface SimulationConstants {
 	public static final int EXPERIMENT_RUNS = 1;
 	
 	/** How long each simulation runs **/
-<<<<<<< HEAD
-	public static final int SIMULATION_INTERVAL = 10;//(int) (1 * 60.0 * 60.0);
+	public static final int SIMULATION_INTERVAL = (int) (2 * 60.0 * 60.0);
 	
 	/** Publish rate (events/time unit) */
 	//public static final double[] PUBLISH_RATE = {0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 3.7, 3.9};
 	//public static final double[] PUBLISH_RATE = {0.5, 1.0, 5.0, 10.0, 15.0, 20.0, 21.0, 22.0, 23.0};
-	public static final double[] PUBLISH_RATE = {100.0};
-	
-	/** File with pub/sub network description */
-	public static final String PS_NETWORK_DESCRIPTOR = "simulation.xml";
-	
-	public static final double MINIMUM_TIME_BETWEEN_EVENTS = 0.001;
-=======
-	public static final int SIMULATION_INTERVAL = (int) (1 * 60.0 * 60.0);
-	
-	/** Publish rate (events/time unit) */
-	//public static final double[] PUBLISH_RATE = {0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 3.7, 3.9};
-	//public static final double[] PUBLISH_RATE = {0.5, 1.0, 5.0, 10.0, 15.0, 20.0, 21.0, 22.0, 23.0};
-	public static final double[] PUBLISH_RATE = {1.0};
+	public static final double[] PUBLISH_RATE = {2.5};
 	
 	/** File with pub/sub network description */
 	public static final String PS_NETWORK_DESCRIPTOR = "simulation.xml";
 	
 	public static final double MINIMUM_TIME_BETWEEN_EVENTS = 0.01;
->>>>>>> refs/remotes/origin/master
 	
 	/** How many hosts will have the private cloud */
 	public final static int NUM_HOST = 100;
@@ -81,7 +66,7 @@ public interface SimulationConstants {
 	public static final double BROKER_VM_COST_PER_PROCESSING = 0.09;
 	public static final double BROKER_VM_COST_PER_MEMORY = 0.05;
 	public static final double BROKER_VM_COST_PER_STORAGE = 0.01;
-	public final static Class<? extends VmScheduler> BROKER_VM_SCHEDULER = VmSchedulerSpaceShared.class;
+	public final static Class<? extends VmScheduler> BROKER_VM_SCHEDULER = PSVmSchedulerSpaceShared.class;
 
 	/** How long is file transfer in network */
 	public static final double LATENCY_OVERHEAD = 0;
@@ -89,4 +74,6 @@ public interface SimulationConstants {
 	/** I/O size */
 	public static final long PUBLISH_CLOUDLET_FILESIZE = 0;
 	public static final long SUBSCRIBE_CLOUDLET_FILESIZE = PUBLISH_CLOUDLET_FILESIZE;
+	
+	public static final double MBIT_TO_BYTE = 125000;
 }

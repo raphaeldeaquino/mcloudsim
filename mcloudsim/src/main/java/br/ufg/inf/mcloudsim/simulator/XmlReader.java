@@ -53,9 +53,9 @@ public class XmlReader {
 					double rate = (rateStr != null && !rateStr.isEmpty()) ? Double.parseDouble(rateStr) : 0.0;
 					String MIprStr = nodeElem.getChildText("MIpr");
 					double MIpr = Double.parseDouble(MIprStr);
-					String MItrStr = nodeElem.getChildText("MItr");
-					double MItr = Double.parseDouble(MItrStr);
-					eventEntity = new Publisher(nodeId, topic, rate, MIpr, MItr);
+					String BtrStr = nodeElem.getChildText("Btr");
+					double Btr = Double.parseDouble(BtrStr);
+					eventEntity = new Publisher(nodeId, topic, rate, MIpr, Btr);
 				} else if (nodeType.equals("subscriber")) {
 					String topic = nodeElem.getChildText("topic");
 					String tONStr = nodeElem.getChildText("tON");

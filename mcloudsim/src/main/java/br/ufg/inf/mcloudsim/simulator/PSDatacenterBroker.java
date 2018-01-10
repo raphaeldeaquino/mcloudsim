@@ -79,6 +79,11 @@ public class PSDatacenterBroker extends DatacenterBroker {
 	/** Controls the forwarding of messages */
 	private Map<String, LinkedList<DeployablePathNode>> pathBrokersMap;
 
+	private List<PSCloudlet> cloudletTransmissionList;
+	private List<PSCloudlet> cloudletTransmissionReceivedList;
+	private List<PSCloudlet> cloudletTransmissionSubmittedList;
+	private int cloudletsTransmissionSubmitted;
+
 	public PSDatacenterBroker(String name, PSNetworkDescriptor psNetwork) throws Exception {
 		super(name);
 		this.avgBrokerRTInPath = new HashMap<>();
@@ -93,6 +98,10 @@ public class PSDatacenterBroker extends DatacenterBroker {
 		this.psNetwork = psNetwork;
 		this.nodeToVmMap = HashBiMap.create();
 		this.pathBrokersMap = new HashMap<>();
+		this.cloudletTransmissionList = new ArrayList<>();
+		this.cloudletTransmissionReceivedList = new ArrayList<>();
+		this.cloudletTransmissionSubmittedList = new ArrayList<>();
+		this.cloudletsTransmissionSubmitted = 0;
 	}
 
 	public Map<String, Double> getAvgRTMapOfPath(String pathId) {
@@ -171,11 +180,49 @@ public class PSDatacenterBroker extends DatacenterBroker {
 		this.nodeToVmMap.put(brokerId, vmId);
 	}
 
+	// OK
+	@Override
+	public void processEvent(SimEvent ev) {
+		switch (ev.getTag()) {
+		// Resource characteristics request
+		case CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST:
+			processResourceCharacteristicsRequest(ev);
+			break;
+		// Resource characteristics answer
+		case CloudSimTags.RESOURCE_CHARACTERISTICS:
+			processResourceCharacteristics(ev);
+			break;
+		// VM Creation answer
+		case CloudSimTags.VM_CREATE_ACK:
+			processVmCreate(ev);
+			break;
+		// A finished cloudlet returned
+		case CloudSimTags.CLOUDLET_RETURN:
+			processCloudletReturn(ev);
+			break;
+
+		// A finished cloudlet returned
+		case PSCloudSimTags.CLOUDLET_TRANSMITTED:
+			processCloudletTransmitted(ev);
+			break;
+
+		// if the simulation finishes
+		case CloudSimTags.END_OF_SIMULATION:
+			shutdownEntity();
+			break;
+		// other unknown tags are processed by this method
+		default:
+			processOtherEvent(ev);
+			break;
+		}
+	}
+
 	/**
 	 * Submit cloudlets to the created VMs.
 	 * 
 	 * @see #submitCloudletList(java.util.List)
 	 */
+	// OK
 	@Override
 	protected void submitCloudlets() {
 		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
@@ -219,32 +266,33 @@ public class PSDatacenterBroker extends DatacenterBroker {
 	 * @param ev
 	 *            a SimEvent object
 	 */
+	// OK
 	protected void processCloudletReturn(SimEvent ev) {
 		PSCloudlet cloudlet = (PSCloudlet) ev.getData();
-		int cloudletVm = cloudlet.getVmId();
-		String currentNodeId = this.nodeToVmMap.inverse().get(cloudletVm);
 		String pathId = cloudlet.getPathId();
 		PSNetworkPath networkPath = this.psNetwork.getNetworkPathWithPublisher(cloudlet.getPathId());
 		Publisher publisher = networkPath.getPublisher();
 
-		getCloudletReceivedList().add(cloudlet);
-		Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloudlet " + cloudlet + " received on broker "
-				+ cloudlet.getBrokerId());
-		cloudletsSubmitted--;
-
 		// if an input task is finished we need to generate an output task
 		if (cloudlet.isInput()) {
-			PSCloudlet outCloudlet = new PSCloudlet(++PSSimulation.cloudletCount, pathId, cloudlet.getBrokerId(),
-					(long) publisher.getMItr(), 1, SimulationConstants.SUBSCRIBE_CLOUDLET_FILESIZE,
-					SimulationConstants.CLOUDLET_OUTPUT_SIZE, new UtilizationModelFull(), new UtilizationModelFull(),
-					new UtilizationModelFull(), PSCloudlet.cloudletType.OUT, CloudSim.clock());
+			getCloudletReceivedList().add(cloudlet);
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloudlet " + cloudlet + " received on broker "
+					+ cloudlet.getBrokerId());
+			cloudletsSubmitted--;
 
-			getCloudletList().add(outCloudlet);
+			PSCloudlet outCloudlet = new PSCloudlet(++PSSimulation.cloudletCount, pathId, cloudlet.getBrokerId(),
+					(long) publisher.getMIpr(), (long) publisher.getBtr(), 1,
+					SimulationConstants.SUBSCRIBE_CLOUDLET_FILESIZE, SimulationConstants.CLOUDLET_OUTPUT_SIZE,
+					new UtilizationModelFull(), new UtilizationModelFull(), new UtilizationModelFull(),
+					PSCloudlet.cloudletType.OUT, CloudSim.clock());
+
+			getCloudletTransmissionList().add(outCloudlet);
 			outCloudlet.setVmId(cloudlet.getVmId());
 			outCloudlet.setUserId(getId());
-			cloudletsSubmitted++;
-			getCloudletSubmittedList().add(outCloudlet);
-			sendNow(getVmsToDatacentersMap().get(outCloudlet.getVmId()), CloudSimTags.CLOUDLET_SUBMIT, outCloudlet);
+			cloudletsTransmissionSubmitted++;
+			getCloudletTransmissionSubmittedList().add(outCloudlet);
+			sendNow(getVmsToDatacentersMap().get(outCloudlet.getVmId()), PSCloudSimTags.CLOUDLET_TRANSMISSION_START,
+					outCloudlet);
 			this.outToInTasksMap.put(outCloudlet, cloudlet);
 
 			double DPr = cloudlet.getActualCPUTime();
@@ -260,6 +308,72 @@ public class PSDatacenterBroker extends DatacenterBroker {
 				this.finishedInTasksPerBrokerInPath.put(mapKey, finishedTasks);
 			}
 		} else {
+			throw new IllegalStateException("Invalid operation: the method processCloudletTransmitted should be used");
+		}
+	}
+
+	/**
+	 * Treat events of change subscriber status (ONLINE and OFFLINE), according
+	 * with distribution scheduled <i>a priori</i>.
+	 */
+	// OK
+	protected void processOtherEvent(SimEvent ev) {
+		if (ev == null) {
+			Log.printLine(getName() + ".processOtherEvent(): " + "Error - an event is null.");
+			return;
+		}
+
+		int tag = ev.getTag();
+		switch (tag) {
+		case PUT_SUBSCRIBER_ONLINE:
+			Subscriber subscriber = (Subscriber) ev.getData();
+			subscriber.setStatus(ConnectivityStatus.ONLINE);
+			Log.printLine(
+					CloudSim.clock() + ": " + getName() + ": Putting subscriber " + subscriber.getId() + " ONLINE");
+			resumePausedCloudlets(subscriber.getId());
+			startNewCloudlets(subscriber.getId());
+			break;
+		case PUT_SUBSCRIBER_OFFLINE:
+			subscriber = (Subscriber) ev.getData();
+			subscriber.setStatus(ConnectivityStatus.OFFLINE);
+			Log.printLine(
+					CloudSim.clock() + ": " + getName() + ": Putting subscriber " + subscriber.getId() + " OFFLINE");
+			break;
+		default:
+			throw new UnsupportedOperationException("Unknow event type");
+		}
+	}
+
+	// OK
+	public List<PSCloudlet> getCloudletTransmissionList() {
+		return cloudletTransmissionList;
+	}
+
+	// OK
+	public List<PSCloudlet> getCloudletTransmissionReceivedList() {
+		return cloudletTransmissionReceivedList;
+	}
+
+	// OK
+	public List<PSCloudlet> getCloudletTransmissionSubmittedList() {
+		return cloudletTransmissionSubmittedList;
+	}
+
+	// OK
+	protected void processCloudletTransmitted(SimEvent ev) {
+		PSCloudlet cloudlet = (PSCloudlet) ev.getData();
+		int cloudletVm = cloudlet.getVmId();
+		String currentNodeId = this.nodeToVmMap.inverse().get(cloudletVm);
+		String pathId = cloudlet.getPathId();
+		PSNetworkPath networkPath = this.psNetwork.getNetworkPathWithPublisher(cloudlet.getPathId());
+		Publisher publisher = networkPath.getPublisher();
+
+		if (cloudlet.isOutput()) {
+			getCloudletTransmissionReceivedList().add(cloudlet);
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloudlet " + cloudlet + " received on broker "
+					+ cloudlet.getBrokerId());
+			cloudletsTransmissionSubmitted--;
+
 			PSCloudlet inCloudlet = this.outToInTasksMap.remove(cloudlet);
 			DeployablePathNode nextBrokerNode = getNextBrokerInPath(pathId, currentNodeId);
 			double DTr = cloudlet.getActualCPUTime();
@@ -295,7 +409,7 @@ public class PSDatacenterBroker extends DatacenterBroker {
 				int nextVmId = this.nodeToVmMap.get(nextBrokerNode.getTargetNode().getId());
 
 				PSCloudlet nextInCloudlet = new PSCloudlet(++PSSimulation.cloudletCount, pathId,
-						nextBrokerNode.getTargetNode().getId(), (long) publisher.getMIpr(), 1,
+						nextBrokerNode.getTargetNode().getId(), (long) publisher.getMIpr(), (long) publisher.getBtr(), 1,
 						SimulationConstants.SUBSCRIBE_CLOUDLET_FILESIZE, SimulationConstants.CLOUDLET_OUTPUT_SIZE,
 						new UtilizationModelFull(), new UtilizationModelFull(), new UtilizationModelFull(),
 						PSCloudlet.cloudletType.IN, CloudSim.clock());
@@ -308,37 +422,8 @@ public class PSDatacenterBroker extends DatacenterBroker {
 				sendNow(getVmsToDatacentersMap().get(nextInCloudlet.getVmId()), CloudSimTags.CLOUDLET_SUBMIT,
 						nextInCloudlet);
 			}
-		}
-	}
-
-	/**
-	 * Treat events of change subscriber status (ONLINE and OFFLINE), according
-	 * with distribution scheduled <i>a priori</i>.
-	 */
-	protected void processOtherEvent(SimEvent ev) {
-		if (ev == null) {
-			Log.printLine(getName() + ".processOtherEvent(): " + "Error - an event is null.");
-			return;
-		}
-
-		int tag = ev.getTag();
-		switch (tag) {
-		case PUT_SUBSCRIBER_ONLINE:
-			Subscriber subscriber = (Subscriber) ev.getData();
-			subscriber.setStatus(ConnectivityStatus.ONLINE);
-			Log.printLine(
-					CloudSim.clock() + ": " + getName() + ": Putting subscriber " + subscriber.getId() + " ONLINE");
-			resumePausedCloudlets(subscriber.getId());
-			startNewCloudlets(subscriber.getId());
-			break;
-		case PUT_SUBSCRIBER_OFFLINE:
-			subscriber = (Subscriber) ev.getData();
-			subscriber.setStatus(ConnectivityStatus.OFFLINE);
-			Log.printLine(
-					CloudSim.clock() + ": " + getName() + ": Putting subscriber " + subscriber.getId() + " OFFLINE");
-			break;
-		default:
-			throw new UnsupportedOperationException("Unknow event type");
+		} else {
+			throw new IllegalStateException("Invalid operation: the method processCloudletReturn should be used");
 		}
 	}
 
@@ -416,9 +501,9 @@ public class PSDatacenterBroker extends DatacenterBroker {
 			for (int i = 0; i < n; i++) {
 				PSCloudlet cloudlet = newCloudlets.element();
 				if (cloudlet.getPathId().equals(networkPath.getPathId())) {
-					cloudletsSubmitted++;
-					getCloudletSubmittedList().add(cloudlet);
-					sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
+					cloudletsTransmissionSubmitted++;
+					getCloudletTransmissionSubmittedList().add(cloudlet);
+					sendNow(getVmsToDatacentersMap().get(vm.getId()), PSCloudSimTags.CLOUDLET_TRANSMISSION_START, cloudlet);
 					newCloudlets.remove();
 				}
 			}
@@ -441,7 +526,7 @@ public class PSDatacenterBroker extends DatacenterBroker {
 			for (int i = 0; i < n; i++) {
 				PSCloudlet cloudlet = pausedCloudlets.element();
 				if (cloudlet.getPathId().equals(networkPath.getPathId())) {
-					sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_RESUME, cloudlet);
+					sendNow(getVmsToDatacentersMap().get(vm.getId()), PSCloudSimTags.CLOUDLET_TRANSMISSION_RESUME, cloudlet);
 					pausedCloudlets.remove();
 				}
 			}
@@ -475,7 +560,7 @@ public class PSDatacenterBroker extends DatacenterBroker {
 
 		return pathBrokers.get(i + 1);
 	}
-
+	
 	/**
 	 * Print in the standard log the simulation results.<BR>
 	 * It must be called. Otherwise {@link DatacenterBroker#finishExecution}
